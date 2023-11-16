@@ -29,7 +29,6 @@ def update_user_info(username, email, age, grade_12_score, jee_score, neet_score
     connection.close()
     st.success("User information updated successfully.")
 
-
 def display_user_prof(User1, user_info):
     st.text(f"Username: {User1}")
 
@@ -39,9 +38,18 @@ def display_user_prof(User1, user_info):
         return
 
     email = st.text_input('Email', user_info[1])
-    age = st.number_input('Age', min_value=float(0), value=float(user_info[2]))
-    grade_12_score = st.number_input('Grade 12 Score', min_value=float(0.0), value=float(user_info[3]))
-    jee_score = st.number_input('JEE Score', min_value=float(0.0), value=float(user_info[4]), key='jee_score')
+
+    # Check if age is not None
+    age_default = 0.0 if user_info[2] is None else float(user_info[2])
+    age = st.number_input('Age', min_value=float(0.0), value=age_default)
+    
+    # Check if grade_12_score is not None
+    grade_12_score_default = 0.0 if user_info[3] is None else float(user_info[3])
+    grade_12_score = st.number_input('Grade 12 Score', min_value=float(0.0), value=grade_12_score_default)
+    
+    # Check if jee_score is not None
+    jee_score_default = 0.0 if user_info[4] is None else float(user_info[4])
+    jee_score = st.number_input('JEE Score', min_value=float(0.0), value=jee_score_default, key='jee_score')
 
     # Check if neet_score is None
     neet_score_default = 0.0 if user_info[5] is None else float(user_info[5])
@@ -71,9 +79,6 @@ def display_user_prof(User1, user_info):
         else:
             update_user_info(User1, email, age, grade_12_score, jee_score, neet_score, phone, gender, password, about, new_password_updation=False)
 
-
-
-
 def ProfilePage(User1):
     st.subheader(f"Hey, {User1}, feel like changing your profile?")
     connection = connect_to_database()
@@ -82,9 +87,10 @@ def ProfilePage(User1):
     result = cursor.fetchall()
     cursor.close()
     connection.close()
-    display_user_prof(User1,result[0])
-            
-
+    if result:
+        display_user_prof(User1, result[0])
+    else:
+        st.warning("User not found.")
 
 # Check if the user is logged in
 if 'Username' not in st.session_state:
@@ -94,6 +100,5 @@ User1 = st.session_state['Username']
 
 if User1 != "":
     ProfilePage(User1)
-
 else:
     st.warning("You need to log in to access this page.")
